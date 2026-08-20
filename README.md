@@ -3,53 +3,57 @@
 
 # Keypilot
 
-Copilot-style inline completion for VSCode, powered by Gemini's `generateContent` API.
+Inline code completion for VSCode, powered by Gemini (or any OpenAI-compatible API).
 
 ## Install
 
-1. `code --install-extension` needs a packaged `.vsix`, or just run it live:
-2. Open this folder in VSCode → press `F5` → "Extension Development Host" window opens with the extension loaded.
-3. (Package instead: `npm i -g @vscode/vsce && vsce package`, then install the `.vsix`.)
+1. Open this folder in VSCode → press **F5** → "Extension Development Host" opens with the extension loaded.
+2. Or package it: `npm i -g @vscode/vsce && vsce package`, then install the generated `.vsix`.
 
-## Setup (Google login — OAuth)
+## Setup
 
-One-time Google Cloud setup (needed because there's no hosted backend):
+### Option 1: Gemini API key (free tier available)
 
-1. Google Cloud Console → **APIs & Services → Enable APIs** → enable **Generative Language API**.
-2. **Credentials → Create credentials → OAuth client ID → Application type: Desktop app**.
-3. Copy the **Client ID** and **Client secret** into settings:
-   - `geminiAutocomplete.clientId`
-   - `geminiAutocomplete.clientSecret`
-     (Desktop-app secrets are not treated as confidential — fine to store locally.)
-4. Run command **Gemini Autocomplete: Login with Google** → browser opens → approve.
-   Tokens are saved encrypted in VSCode SecretStorage and auto-refreshed. Log out anytime with **Gemini Autocomplete: Logout**.
+1. Go to [Google AI Studio](https://aistudio.google.com/apikey) and create an API key.
+2. In VSCode: **Keypilot: Set API Key** command, paste your key.
 
-If a request returns **403**, adjust `geminiAutocomplete.scope`.
+### Option 2: Groq API key (free)
 
-## 🔧 Quick Test (Autocomplete Check)
+1. Go to [Groq Console](https://console.groq.com/keys) and create an API key.
+2. Set the key as above.
+3. Change model to `llama-3.3-70b-versatile` (or `llama-3.1-8b-instant` for faster responses).
+4. Set endpoint to `https://api.groq.com/openai/v1/chat/completions`.
 
-### Open the Command Palette
+### Option 3: Any OpenAI-compatible API
 
-1. macOS → Cmd + Shift + P
-2. Windows → Ctrl + Shift + P
-3. Linux → Ctrl + Shift + P
+Set your API key, model name, and endpoint in settings — it works with any provider that exposes `/chat/completions`.
 
-- `Then type “Keypilot Test” and press Enter.`
-- `If the extension is active, you’ll see a confirmation message.`
+## Settings
 
-### Fallback: plain API key
+| Setting | Default | Description |
+|---|---|---|
+| `keypilot.apiKey` | `""` | Your API key |
+| `keypilot.model` | `gemini-3.1-flash-lite` | Model name |
+| `keypilot.endpoint` | `https://generativelanguage.googleapis.com/v1beta/openai/chat/completions` | Chat completions URL |
+| `keypilot.enabled` | `true` | Toggle suggestions on/off |
+| `keypilot.maxContextChars` | `3000` | Max chars of context before cursor |
 
-Prefer no OAuth? Set `geminiAutocomplete.apiKey` (from https://aistudio.google.com/apikey) and it's used instead of login.
+## Usage
 
-Other settings: `model` (default `gemini-2.0-flash`), `endpoint`, `enabled` (toggle command), `maxContextChars`.
+Type code — ghost-text suggestions appear inline. Press **Tab** to accept.
 
-Type code — ghost-text suggestions appear inline. `Tab` accepts.
+## Commands
+
+- **Keypilot: Test Completion** — quick test to check if it works
+- **Keypilot: Set API Key** — set or change your API key
+- **Keypilot: Reset Token Counter** — reset usage stats
+- **Keypilot: Open Stats** — open stats view in sidebar
 
 ## Notes
 
-- Sends up to `maxContextChars` before/after the cursor to the API. Your code leaves your machine — check Google's data terms before use on private repos.
-- OAuth is a loopback PKCE flow (`127.0.0.1:<random port>`), no client secret in source.
-- Naive 300ms debounce, single-file provider, no build step.
+- Sends code context to the API. Check your provider's data terms before use on private repos.
+- No build step required — single `extension.js` file.
+- Stats view available in the Keypilot sidebar panel.
 
 ## Support the team
 
